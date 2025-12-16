@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FairRank AI - Ethical Scoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Optional for icons -->
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="logo">
+                <span class="logo-icon">⚖️</span>
+                <h1>FairRank AI</h1>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-view="candidate">Candidate Portal</button>
+                <button class="nav-btn" data-view="admin">Admin Dashboard</button>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <!-- Views will be injected here -->
+            <section id="candidate-view" class="view active">
+                <div class="hero">
+                    <h2>Upload Your Resume</h2>
+                    <p>Get fair, transparent, and AI-powered feedback instantly.</p>
+                </div>
+                
+                <div class="upload-container glass-panel">
+                    <form id="resume-form">
+                        <div class="file-drop-area" id="drop-area">
+                            <span class="icon">📂</span>
+                            <span class="file-msg">Drag & Drop your Resume (PDF, DOCX, Image)</span>
+                            <input class="file-input" type="file" id="resume-file" accept=".pdf,.docx,.png,.jpg,.jpeg">
+                        </div>
+                        <button type="submit" class="submit-btn">Evaluate Resume</button>
+                    </form>
+                </div>
+
+                <div id="result-container" class="hidden">
+                    <!-- Results injected via JS -->
+                </div>
+            </section>
+
+            <section id="admin-view" class="view hidden">
+                <div class="admin-grid">
+                    <div class="has-jd glass-panel">
+                        <h3>Job Descriptions</h3>
+                        <div id="jd-list" class="list-group">
+                            <!-- JDs list -->
+                        </div>
+                        <button id="add-jd-btn" class="action-btn">+ Add New JD</button>
+                        
+                        <div id="jd-upload-form" class="hidden">
+                            <input type="text" id="jd-title" placeholder="Job Title" class="input-field">
+                            <textarea id="jd-text" placeholder="Paste JD text..." class="input-area"></textarea>
+                            <p>OR</p>
+                            <input type="file" id="jd-file">
+                            <button id="submit-jd-btn" class="primary-btn">Upload JD</button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats glass-panel">
+                        <h3>System Stats</h3>
+                        <p>Active JDs: <span id="jd-count">0</span></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
