@@ -17,4 +17,4 @@ class Config:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
     CHROMA_DB_DIR.mkdir(parents=True, exist_ok=True)
 
-    MODEL_NAME = "gemini-2.0-flash-exp" # Using the latest available flash model
+    MODEL_NAME = "gemini-2.5-flash" # Using the latest available flash model

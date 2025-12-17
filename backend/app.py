@@ -3,6 +3,7 @@ import os
 from resume_parser import extract_text
 from rag_pipeline import compute_match_score
 from email_service import send_acknowledgment_email, send_congratulatory_email, send_rejection_email
+from database import store_resume
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
@@ -10,6 +11,10 @@ load_dotenv()
 app = Flask(__name__)
 UPLOAD_FOLDER = "data/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({"status": "Resume Scanner API is running"}), 200
 
 @app.route("/submit", methods=["POST"])
 def submit_resume():

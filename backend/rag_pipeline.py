@@ -1,5 +1,7 @@
-from langchain.llms.base import LLM
-from langchain.prompts import PromptTemplate
+#from langchain.llms.base import LLM
+from langchain_core.language_models import LLM
+#from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 import requests
 import json
 from sentence_transformers import SentenceTransformer
@@ -20,7 +22,7 @@ class GeminiLLM(LLM):
             "contents": [{"parts": [{"text": prompt}]}]
         }
         response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
             headers=headers,
             json=data
         )
@@ -46,7 +48,7 @@ def compute_match_score(resume_text, job_description):
     # Compute cosine similarity
     D, I = index.search(np.array([resume_embedding]), 1)
     score = 1 - (D[0][0] / 2)  # Normalize to 0-1
-    score = score * 100  # Convert to percentage
+    score = float(score * 100)  # Convert to percentage and cast to native float
 
     # Use Gemini for detailed analysis
     llm = GeminiLLM()
@@ -54,5 +56,5 @@ def compute_match_score(resume_text, job_description):
         input_variables=["resume", "job"],
         template="Analyze the resume and job description. Extract key skills, experience, and qualifications. Provide a brief summary of the match quality.\nResume: {resume}\nJob Description: {job}"
     )
-    analysis = llm(prompt.format(resume=resume_text, job=job_description))
+    analysis = llm.invoke(prompt.format(resume=resume_text, job=job_description))
     return score, analysis
