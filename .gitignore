@@ -11,10 +11,6 @@ ENV/
 # Environment variables
 .env
 
-
-
-
-
 # Data
 data/uploads/*
 data/job_descriptions/*
