@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # ------------------------------------------------------------------
+  # Frontend Verification
+  # ------------------------------------------------------------------
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Code
+        run: npm run lint
+        continue-on-error: true # Don't fail build on lint warnings for now, can be strict later
+
+      - name: Run Tests
+        run: npm run test -- --run # Run once, don't watch
+
+      - name: Build Application
+        run: npm run build
+
+  # ------------------------------------------------------------------
+  # Backend Services Verification (Matrix)
+  # ------------------------------------------------------------------
+  backend-ci:
+    name: Service CI (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - attendance-service
+          - auth-service
+          - employee-service
+          - leave-service
+          - org-structure-service
+          - recruitment-service
+          - training-service
+
+    defaults:
+      run:
+        working-directory: ./services/${{ matrix.service }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # We can't easily cache multiple package-locks in a simple matrix without distinct keys, 
+          # but npm install is fast enough for now.
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Most services don't have tests yet, but if they did:
+      # - name: Run Tests
+      #   run: npm test
+
+  # ------------------------------------------------------------------
+  # Docker Composition Verification
+  # ------------------------------------------------------------------
+  docker-build:
+    name: Docker Compose Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Containers
+        run: docker-compose build
