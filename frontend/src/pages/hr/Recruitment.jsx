@@ -72,6 +72,24 @@ const Recruitment = () => {
         }
     };
 
+    const handleScheduleInterview = async (app) => {
+        const time = window.prompt("Enter interview time (e.g. 2026-01-20T10:00:00Z):", new Date().toISOString());
+        if (!time) return;
+
+        try {
+            await recruitmentAPI.scheduleInterview({
+                applicationId: app.id,
+                interviewTime: time,
+                interviewerEmail: 'hr@example.com'
+            });
+            alert('Interview scheduled successfully!');
+            fetchData();
+            setIsAppModalOpen(false);
+        } catch (err) {
+            alert('Error scheduling interview: ' + err.message);
+        }
+    };
+
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -226,6 +244,7 @@ const Recruitment = () => {
                 onClose={() => setIsAppModalOpen(false)}
                 application={selectedApp}
                 onUpdateStage={handleUpdateAppStage}
+                onScheduleInterview={handleScheduleInterview}
             />
         </div >
     );

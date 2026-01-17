@@ -168,3 +168,66 @@ exports.getStats = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+exports.updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { first_name, last_name, role, email, password, phone, is_active } = req.body;
+
+        // Check if user exists
+        const user = await AuthUser.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prepare update data
+        const updateData = {
+            first_name,
+            last_name,
+            role,
+            email,
+            phone,
+            is_active
+        };
+
+        // Only hash and update password if provided
+        if (password && password.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password_hash = await bcrypt.hash(password, salt);
+        }
+
+        await user.update(updateData);
+
+        res.status(200).json({
+            message: 'User updated successfully',
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                is_active: user.is_active
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await AuthUser.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Perform hard delete
+        await user.destroy();
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

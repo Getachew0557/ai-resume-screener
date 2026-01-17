@@ -1,7 +1,11 @@
 import fitz  # PyMuPDF
 from docx import Document
-import pytesseract
-from PIL import Image
+try:
+    import pytesseract
+    from PIL import Image
+    HAS_OCR = True
+except ImportError:
+    HAS_OCR = False
 import os
 
 def extract_text(file_path):

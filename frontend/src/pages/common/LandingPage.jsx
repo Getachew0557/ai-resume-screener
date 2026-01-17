@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicNavbar from '../../components/layout/PublicNavbar';
+import Chatbot from '../../components/Chat/Chatbot';
 
 const LandingPage = () => {
     return (
@@ -174,6 +175,9 @@ const LandingPage = () => {
                     </div>
                 </div>
             </footer>
+
+            {/* AI Chatbot */}
+            <Chatbot />
 
         </div>
     );

@@ -32,6 +32,7 @@ export const NAVIGATION_CONFIG = {
         { path: '/hr/training', label: 'Training Management', icon: 'courses' },
         { path: '/hr/recruitment', label: 'Recruitment', icon: 'recruitment' },
         { path: '/hr/leave', label: 'Leave Management', icon: 'leave' },
+        { path: '/hr/attendance', label: 'Attendance Management', icon: 'attendance' },
     ],
     [ROLES.MANAGER]: [
         { path: '/manager/dashboard', label: 'Dashboard', icon: 'dashboard' },

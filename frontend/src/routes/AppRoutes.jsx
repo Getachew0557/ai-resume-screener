@@ -23,6 +23,7 @@ import HRDashboard from '../pages/hr/Dashboard';
 import Employees from '../pages/hr/Employees';
 import Recruitment from '../pages/hr/Recruitment';
 import LeaveManagement from '../pages/hr/LeaveManagement';
+import AttendanceManagement from '../pages/hr/AttendanceManagement';
 
 import ManagerDashboard from '../pages/manager/Dashboard';
 import Team from '../pages/manager/Team';
@@ -77,6 +78,7 @@ const AppRoutes = () => {
                 <Route path="/hr/training" element={<RoleBasedRoute allowedRoles={[ROLES.HR]}><TrainingManagement /></RoleBasedRoute>} />
                 <Route path="/hr/recruitment" element={<RoleBasedRoute allowedRoles={[ROLES.HR]}><Recruitment /></RoleBasedRoute>} />
                 <Route path="/hr/leave" element={<RoleBasedRoute allowedRoles={[ROLES.HR]}><LeaveManagement /></RoleBasedRoute>} />
+                <Route path="/hr/attendance" element={<RoleBasedRoute allowedRoles={[ROLES.HR]}><AttendanceManagement /></RoleBasedRoute>} />
 
                 <Route path="/manager" element={<RoleBasedRoute allowedRoles={[ROLES.MANAGER]}><Navigate to="/manager/dashboard" /></RoleBasedRoute>} />
                 <Route path="/manager/dashboard" element={<RoleBasedRoute allowedRoles={[ROLES.MANAGER]}><ManagerDashboard /></RoleBasedRoute>} />

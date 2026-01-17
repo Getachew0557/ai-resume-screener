@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const recruitmentController = require('../controllers/recruitmentController');
 const { authenticate, authorize } = require('../middleware/authMiddleware');
+const multer = require('multer');
+
+// Configure Multer for memory storage
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 // Job Routes
 // Only HR and Admin can manage jobs. Listing jobs could be public or protected.
@@ -16,7 +23,7 @@ router.delete('/jobs/:id', authenticate, authorize('hr', 'admin'), recruitmentCo
 
 // Application Routes
 // Candidates can apply without login (public)
-router.post('/applications', recruitmentController.applyForJob);
+router.post('/applications', upload.single('resume'), recruitmentController.applyForJob);
 
 // Only HR and Admin can view and process applications
 router.get('/applications', authenticate, authorize('hr', 'admin'), recruitmentController.getApplications);

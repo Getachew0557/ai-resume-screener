@@ -14,19 +14,24 @@ def index():
 
 @app.route("/submit", methods=["POST"])
 def submit_resume():
-    if "resume" not in request.files or "job_description" not in request.form:
-        return jsonify({"error": "Missing resume or job description"}), 400
+    if "resume" not in request.files and "resume_url" not in request.form:
+        return jsonify({"error": "Missing resume file or resume_url"}), 400
 
-    resume = request.files["resume"]
+    if "job_description" not in request.form:
+        return jsonify({"error": "Missing job_description"}), 400
+
+    resume_file = request.files.get("resume")
+    resume_url = request.form.get("resume_url")
+
     job_description = request.form["job_description"]
     candidate_name = request.form.get("name", "Candidate")
     email = request.form.get("email", "")
 
     try:
-        result = resume_service.process_submission(resume, job_description, candidate_name, email)
+        result = resume_service.process_submission(resume_file, resume_url, job_description, candidate_name, email)
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5005)
+    app.run(host='0.0.0.0', debug=True, port=5005)

@@ -43,6 +43,8 @@ const UserManagement = () => {
         last_name: '',
         phone: '',
     });
+    const [editMode, setEditMode] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -92,6 +94,8 @@ const UserManagement = () => {
             last_name: '',
             phone: '',
         });
+        setEditMode(false);
+        setSelectedUserId(null);
     };
 
     const handleInputChange = (e) => {
@@ -107,14 +111,47 @@ const UserManagement = () => {
         setSuccess('');
 
         try {
-            await authAPI.register(formData);
-            setSuccess('User created successfully!');
+            if (editMode && selectedUserId) {
+                await authAPI.updateUser(selectedUserId, formData);
+                setSuccess('User updated successfully!');
+            } else {
+                await authAPI.register(formData);
+                setSuccess('User created successfully!');
+            }
             setTimeout(() => {
                 handleCloseModal();
                 fetchUsers();
             }, 1500);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to create user');
+            setError(err.response?.data?.message || (editMode ? 'Failed to update user' : 'Failed to create user'));
+        }
+    };
+
+    const handleEditUser = (user) => {
+        setFormData({
+            email: user.email,
+            password: '', // Leave empty to keep unchanged
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            phone: user.phone || '',
+        });
+        setSelectedUserId(user.id);
+        setEditMode(true);
+        setOpenModal(true);
+    };
+
+    const handleDeleteUser = async (userId) => {
+        if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            try {
+                await authAPI.deleteUser(userId);
+                setSuccess('User deleted successfully');
+                fetchUsers(); // Refresh list
+                setTimeout(() => setSuccess(''), 3000);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to delete user');
+                setTimeout(() => setError(''), 3000);
+            }
         }
     };
 
@@ -246,10 +283,10 @@ const UserManagement = () => {
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <IconButton size="small" color="primary">
+                                                <IconButton size="small" color="primary" onClick={() => handleEditUser(user)}>
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton size="small" color="error">
+                                                <IconButton size="small" color="error" onClick={() => handleDeleteUser(user.id)}>
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </TableCell>
@@ -272,7 +309,7 @@ const UserManagement = () => {
 
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
                 <DialogTitle sx={{ pb: 1 }}>
-                    <span className="text-2xl font-bold">Create New User</span>
+                    <span className="text-2xl font-bold">{editMode ? 'Edit User' : 'Create New User'}</span>
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
                     <DialogContent>
@@ -324,8 +361,8 @@ const UserManagement = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                required
-                                helperText="Minimum 8 characters"
+                                required={!editMode}
+                                helperText={editMode ? "Leave blank to keep current password" : "Minimum 8 characters"}
                             />
 
                             <TextField
@@ -366,7 +403,8 @@ const UserManagement = () => {
                                 },
                             }}
                         >
-                            Create User
+
+                            {editMode ? 'Update User' : 'Create User'}
                         </Button>
                     </DialogActions>
                 </form>

@@ -27,6 +27,10 @@ const createServiceInstance = (serviceName) => {
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
+            // If data is FormData, let the browser set the Content-Type with boundary
+            if (config.data instanceof FormData) {
+                delete config.headers['Content-Type'];
+            }
             return config;
         },
         (error) => {
@@ -65,6 +69,8 @@ export const authAPI = {
     validateToken: () => authService.post('auth/validate'),
     getUsers: (params) => authService.get('auth/users', { params }),
     getStats: () => authService.get('auth/stats'),
+    updateUser: (id, data) => authService.put(`auth/users/${id}`, data),
+    deleteUser: (id) => authService.delete(`auth/users/${id}`),
 };
 
 export const profileAPI = {
@@ -99,8 +105,9 @@ export const recruitmentAPI = {
     // Applications
     getApplications: (params) => recruitmentService.get('recruitment/applications', { params }),
     getApplication: (id) => recruitmentService.get(`recruitment/applications/${id}`),
-    createApplication: (data) => recruitmentService.post('recruitment/applications', data),
+    createApplication: (data, config) => recruitmentService.post('recruitment/applications', data, config),
     updateApplicationStage: (id, data) => recruitmentService.patch(`recruitment/applications/${id}/stage`, data),
+    scheduleInterview: (data) => recruitmentService.post('recruitment/applications/schedule', data),
     getStats: () => recruitmentService.get('recruitment/stats'),
 };
 

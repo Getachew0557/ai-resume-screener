@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            display: block;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            display: block;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .category {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .analysis {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🤖 AI Agent Resume Tester</h1>
+        <p class="subtitle">Test the AI-powered resume screening service</p>
+
+        <form id="resumeForm">
+            <div class="form-group">
+                <label for="resume">Resume (PDF or DOCX) *</label>
+                <input type="file" id="resume" name="resume" accept=".pdf,.docx" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Candidate Name *</label>
+                <input type="text" id="name" name="name" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" placeholder="john@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jobDescription">Job Description *</label>
+                <textarea id="jobDescription" name="job_description"
+                    placeholder="Full Stack Developer with 5 years of React and Node.js experience..."
+                    required></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">Analyze Resume</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea; font-weight: 600;">AI is analyzing the resume...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('resumeForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show loading
+            loading.classList.add('active');
+            result.style.display = 'none';
+            submitBtn.disabled = true;
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('resume', document.getElementById('resume').files[0]);
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('job_description', document.getElementById('jobDescription').value);
+
+            try {
+                // Send to AI Agent
+                const response = await fetch('http://localhost:5005/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+
+                if (response.ok) {
+                    // Show success result
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ Analysis Complete!</h3>
+                        <div class="score">${data.score}/100</div>
+                        <div class="category">${getCategoryEmoji(data.category)} ${data.category}</div>
+                        <div class="analysis">
+                            <strong>AI Analysis:</strong><br>
+                            ${data.analysis || 'Resume successfully processed.'}
+                        </div>
+                        <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                            <strong>Status:</strong> ${getStatusMessage(data.category)}<br>
+                            <strong>ID:</strong> ${data.id}
+                        </p>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                // Hide loading
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+
+                // Show error
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${error.message}</p>
+                    <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                        Make sure the AI Agent service is running on port 5005.
+                    </p>
+                `;
+            }
+        });
+
+        function getCategoryEmoji(category) {
+            const emojis = {
+                'Match': '🎯',
+                'Partial Match': '⚠️',
+                'Skills Gap': '📚',
+                'Irrelevant': '❌'
+            };
+            return emojis[category] || '📄';
+        }
+
+        function getStatusMessage(category) {
+            const messages = {
+                'Match': 'Interview will be scheduled automatically!',
+                'Partial Match': 'Flagged for HR review',
+                'Skills Gap': 'Candidate needs additional training',
+                'Irrelevant': 'Not suitable for this position'
+            };
+            return messages[category] || 'Processed';
+        }
+    </script>
+</body>
+
+</html>

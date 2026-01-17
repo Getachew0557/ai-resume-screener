@@ -70,15 +70,83 @@ exports.deleteJob = async (req, res) => {
 };
 
 // Application Controllers
+const axios = require('axios');
+const FormData = require('form-data');
+
+// Application Controllers
 exports.applyForJob = async (req, res) => {
     try {
+        console.log("Received Application Request");
+        console.log("Headers content-type:", req.headers['content-type']);
+        console.log("Body keys:", Object.keys(req.body));
+        if (req.file) {
+            console.log("File received:", req.file.originalname, req.file.size, req.file.mimetype);
+        } else {
+            console.log("No file received");
+        }
+
         const data = { ...req.body };
+        // Sanitize empty strings
         Object.keys(data).forEach(key => {
             if (data[key] === '') data[key] = null;
         });
+
+        // If file uploaded, get the buffer. In a real app we'd upload to S3 here.
+        // For now, we'll store a placeholder URL or the actual file handling needs to be robust.
+        // Since we are just forwarding to AI Agent, we don't necessarily need to store the file PERMANENTLY in recruitment-service if the AI agent stores it.
+        // But let's assume Recruitment Service needs a record.
+
+        if (req.file) {
+            data.resume_url = `uploads/${req.file.originalname}`; // Placeholder for local/S3 path
+        } else if (!data.resume_url) {
+            return res.status(400).json({ message: 'Resume is required (File or Link)' });
+        }
+
         const application = await Application.create(data);
+
+        // Forward to AI Agent for screening
+        // We do this asynchronously to not block the response, or we can await it.
+        // Let's await it to give immediate feedback if AI service is down? No, fail soft.
+        try {
+            const aiAgentUrl = process.env.AI_AGENT_URL || 'http://localhost:5005';
+            const formData = new FormData();
+
+            // Get Job Description
+            const job = await Job.findByPk(data.job_id);
+            const jobDescription = job ? job.description : "Standard Job Requirements";
+
+            formData.append('job_description', jobDescription);
+            formData.append('name', data.full_name);
+            formData.append('email', data.email);
+
+            if (req.file) {
+                // Attach file
+                formData.append('resume', req.file.buffer, req.file.originalname);
+            } else {
+                // Attach Link
+                formData.append('resume_url', data.resume_url);
+            }
+
+            console.log(`Forwarding application ${application.id} to AI Agent at ${aiAgentUrl}/submit`);
+
+            // Send to AI Agent (Fire and Forget - don't await)
+            axios.post(`${aiAgentUrl}/submit`, formData, {
+                headers: {
+                    ...formData.getHeaders()
+                }
+            }).then(() => {
+                console.log(`[Recruitment] Successfully forwarded application ${application.id} to AI Agent`);
+            }).catch(aiError => {
+                console.error('[Recruitment] Failed to forward to AI Agent:', aiError.message);
+            });
+
+        } catch (setupError) {
+            console.error('[Recruitment] Error setting up AI forwarding:', setupError.message);
+        }
+
         res.status(201).json(application);
     } catch (error) {
+        console.error('Application Error:', error);
         res.status(400).json({ message: error.message });
     }
 };

@@ -1,5 +1,6 @@
 import os
 import requests
+import re
 from werkzeug.utils import secure_filename
 from services.resume_parser import extract_text
 from services.rag_pipeline import compute_match_score
@@ -11,10 +12,38 @@ class ResumeService:
         self.upload_folder = upload_folder
         os.makedirs(self.upload_folder, exist_ok=True)
 
-    def process_submission(self, resume_file, job_description, candidate_name, email):
-        filename = secure_filename(resume_file.filename)
-        resume_path = os.path.join(self.upload_folder, filename)
-        resume_file.save(resume_path)
+    def process_submission(self, resume_file, resume_url, job_description, candidate_name, email):
+        if resume_file:
+            filename = secure_filename(resume_file.filename)
+            resume_path = os.path.join(self.upload_folder, filename)
+            resume_file.save(resume_path)
+        elif resume_url:
+            # Generate a filename from the URL or timestamp
+            filename = f"resume_{secure_filename(candidate_name)}_{secure_filename(email)}.pdf"
+            resume_path = os.path.join(self.upload_folder, filename)
+            
+            # Handle Google Drive Links
+            download_url = resume_url
+            gdrive_match = re.search(r'/file/d/([a-zA-Z0-9_-]+)', resume_url)
+            if gdrive_match:
+                file_id = gdrive_match.group(1)
+                download_url = f"https://drive.google.com/uc?id={file_id}&export=download"
+                print(f"Converted Google Drive Link to: {download_url}")
+
+            # Download the file
+            try:
+                print(f"Downloading resume from: {download_url}")
+                response = requests.get(download_url, stream=True)
+                response.raise_for_status()
+                with open(resume_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                print(f"Downloaded resume to {resume_path}")
+            except Exception as e:
+                print(f"Failed to download resume: {e}")
+                raise ValueError(f"Failed to download resume from URL provided: {e}")
+        else:
+             raise ValueError("No resume file or URL provided")
 
         try:
             # Parse resume

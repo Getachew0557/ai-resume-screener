@@ -27,13 +27,15 @@ const JobBoard = () => {
         fetchOpenJobs();
     }, []);
 
-    const handleApply = async (applicationData) => {
+    const handleApply = async (applicationData, onUploadProgress) => {
         try {
-            await recruitmentAPI.createApplication(applicationData);
-            alert('Transmission Successful. Your candidacy is now encrypted.');
+            await recruitmentAPI.createApplication(applicationData, {
+                onUploadProgress: onUploadProgress
+            });
+            alert('Application submitted successfully!');
             setIsApplyModalOpen(false);
         } catch (err) {
-            alert('Transmission Interrupted: ' + err.message);
+            alert('Failed to submit application: ' + (err.response?.data?.message || err.message));
         }
     };
 

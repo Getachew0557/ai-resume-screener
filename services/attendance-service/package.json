@@ -15,7 +15,8 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-      "seed": "node src/seed/seeder.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/seed/seeder.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

@@ -12,8 +12,8 @@
           <p className="text-3xl font-bold mt-2">12</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-gray-500 text-sm">Pending Leaves</h3>
-          <p className="text-3xl font-bold mt-2">8</p>
+          <h3 className="text-gray-500 text-sm">Attendance Today</h3>
+          <p className="text-3xl font-bold mt-2">42</p>
         </div>
       </div>
     </div>
