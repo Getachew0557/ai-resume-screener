@@ -34,15 +34,6 @@ const ApplyModal = ({ isOpen, onClose, onApply, job }) => {
             submissionData = data;
         } else {
             // Regular JSON for URL
-            // Validate URL format
-            const urlPattern = /^(https?:\/\/(?:www\.)?(?:drive\.google\.com\/file\/d\/[^\/]+\/view|.*?\.(?:pdf|docx?|jpe?g|png))(?:\?.*)?)$/i;
-
-            if (!urlPattern.test(formData.resume_url)) {
-                alert("Please enter a valid Resume URL (Google Drive link or direct .pdf/.doc/.docx/.jpg/.png link)");
-                setIsSubmitting(false);
-                return;
-            }
-
             submissionData = {
                 full_name: formData.full_name,
                 email: formData.email,

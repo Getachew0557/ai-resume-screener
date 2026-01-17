@@ -427,3 +427,21 @@ export const cancelLeaveRequest = async (req, res) => {
   }
 };
 
+
+export const getLeaveStats = async (req, res) => {
+  try {
+    const pending = await LeaveRequest.count({ where: { status: 'pending' } });
+    const approved = await LeaveRequest.count({ where: { status: 'approved' } });
+    const rejected = await LeaveRequest.count({ where: { status: 'rejected' } });
+
+    res.json({
+      pending,
+      approved,
+      rejected,
+      total: pending + approved + rejected
+    });
+  } catch (error) {
+    console.error('Error fetching leave stats:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController.js');
 
+router.get('/stats', attendanceController.getAttendanceStats);
 router.post('/clockin', attendanceController.markAttendance);
 router.put('/clockout/:id', attendanceController.clockOut);
 router.get('/date', attendanceController.getAttendanceByDate);

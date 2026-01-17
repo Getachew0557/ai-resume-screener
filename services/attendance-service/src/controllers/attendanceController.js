@@ -12,12 +12,12 @@ const markAttendance = async (req, res) => {
         message: 'Attendance already marked for this date'
       });
     }
-const shiftStartTime = new Date(shift_start).toTimeString().split(' ')[0];
+    const shiftStartTime = new Date(shift_start).toTimeString().split(' ')[0];
     const attendance = await Attendance.create({
       employee_id,
       clock_date,
       clock_in: new Date(),
-      shift_start:shiftStartTime,
+      shift_start: shiftStartTime,
       status: 'present'
     });
 
@@ -142,7 +142,7 @@ const deleteAttendance = async (req, res) => {
 };
 
 
- const getAttendanceFiltered = async (req, res) => {
+const getAttendanceFiltered = async (req, res) => {
   try {
     const { startDate, endDate, employeeId } = req.query;
     const whereClause = {};
@@ -169,6 +169,26 @@ const deleteAttendance = async (req, res) => {
   }
 };
 
+const getAttendanceStats = async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const present = await Attendance.count({ where: { clock_date: today, status: 'present' } });
+    const late = await Attendance.count({ where: { clock_date: today, status: 'late' } });
+    // Note: Absent is harder without total employee count, so we interpret 'absent' records if they exist, or just report what we have.
+    const half_day = await Attendance.count({ where: { clock_date: today, status: 'half_day' } });
+
+    res.json({
+      present,
+      late,
+      half_day,
+      total_marked: present + late + half_day
+    });
+  } catch (error) {
+    console.error("Error fetching attendance stats:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAttendanceFiltered,
   deleteAttendance,
@@ -177,6 +197,7 @@ module.exports = {
   markAttendance,
   clockOut,
   getAttendanceByDate,
-  getAttendanceByEmployee
+  getAttendanceByEmployee,
+  getAttendanceStats
 };
 

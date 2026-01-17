@@ -27,10 +27,6 @@ const createServiceInstance = (serviceName) => {
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
-            // If data is FormData, let the browser set the Content-Type with boundary
-            if (config.data instanceof FormData) {
-                delete config.headers['Content-Type'];
-            }
             return config;
         },
         (error) => {
@@ -123,12 +119,14 @@ export const leaveAPI = {
     createLeave: (data) => leaveService.post('leave', data),
     approveLeave: (id) => leaveService.put(`leave/${id}/approve`),
     rejectLeave: (id) => leaveService.put(`leave/${id}/reject`),
+    getStats: () => leaveService.get('leave/stats'),
 };
 
 export const attendanceAPI = {
     getAttendance: (params) => attendanceService.get('attendance', { params }),
     clockIn: (data) => attendanceService.post('attendance/clock-in', data),
     clockOut: (data) => attendanceService.post('attendance/clock-out', data),
+    getStats: () => attendanceService.get('attendance/stats'),
 };
 
 export const organizationAPI = {
